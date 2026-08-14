@@ -49,7 +49,7 @@ The app authenticates with a Google service account and needs two files in
 `Backend/credentials/` (this directory is gitignored, you have to create it
 yourself):
 
-**`Backend/credentials/service_account.json`** — a service account key from
+**`Backend/credentials/service_account.json`**, a service account key from
 [Google Cloud Console](https://console.cloud.google.com/) with the Google
 Sheets API enabled. Share your spreadsheet with the service account's
 `client_email` (Editor access).
@@ -75,7 +75,7 @@ Yearly change, Notes and important marks.
 The "Stocks/ETFs" and "Loans" tabs each need a `Date` column, then one column
 per account you want to track, then a `Total` column. The app reads whatever
 account names sit between `Date` and `Total` at startup and builds the "Add
-Snapshot" form from them — so it doesn't matter which brokers/platforms you
+Snapshot" form from them, so it doesn't matter which brokers/platforms you
 use or how many, as long as the columns follow that layout. A section with no
 account columns just shows as empty on the form.
 
