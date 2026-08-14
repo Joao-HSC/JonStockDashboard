@@ -137,6 +137,12 @@ legend {
   gap: 0.85rem;
 }
 
+.field-empty-note {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
 label {
   display: flex;
   flex-direction: column;

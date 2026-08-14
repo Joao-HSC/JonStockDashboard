@@ -1,9 +1,10 @@
-from db import get_spreadsheet, get_sheet_data, get_master_history
+from db import get_spreadsheet, get_sheet_data, get_master_history, get_worksheet
 from performance import compute_cagr, compute_max_drawdown, compute_sharpe, parse_date, read_risk_free_rate
 import stock_funcs
 from datetime import date
 import re
 from flask import Blueprint, jsonify, request
+from gspread.utils import rowcol_to_a1
 
 portfolio_bp = Blueprint('portfolio', __name__)
 
@@ -52,6 +53,32 @@ def copy_format_and_formulas(sh, ws, next_row, last_row, num_cols):
         ]
     })
 
+def get_account_columns(ws):
+    """Account names are whatever columns sit between 'Date' and the 'Total' column."""
+    headers = ws.row_values(1)
+    accounts = []
+    for h in headers[1:]:
+        h = (h or "").strip()
+        if not h or h.lower().startswith("total"):
+            break
+        accounts.append(h)
+    return accounts
+
+def account_range(row, account_count):
+    start = rowcol_to_a1(row, 2)  # column B, right after Date
+    end = rowcol_to_a1(row, 1 + account_count)
+    return f'{start}:{end}'
+
+@portfolio_bp.route('/accounts', methods=['GET'])
+def get_accounts():
+    try:
+        return jsonify({
+            "stocks_accounts": get_account_columns(get_worksheet("stocks")),
+            "loans_accounts": get_account_columns(get_worksheet("loans")),
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @portfolio_bp.route('/add-snapshot', methods=['POST'])
 def add_snapshot():
     try:
@@ -59,9 +86,12 @@ def add_snapshot():
         sh = get_spreadsheet()
         current_date = get_today_date()
 
-        master_ws = sh.get_worksheet(0)
-        stocks_ws = sh.worksheet("Stocks/ETFs")
-        loans_ws = sh.worksheet("Loans")
+        master_ws = get_worksheet("master")
+        stocks_ws = get_worksheet("stocks")
+        loans_ws = get_worksheet("loans")
+
+        stocks_accounts = get_account_columns(stocks_ws)
+        loans_accounts = get_account_columns(loans_ws)
 
         # calculate next rows before any insertions
         master_next = len(master_ws.col_values(1)) + 1
@@ -75,15 +105,23 @@ def add_snapshot():
 
         # copy formulas and formatting
         copy_format_and_formulas(sh, master_ws, master_next, master_next - 1, 13)
-        copy_format_and_formulas(sh, stocks_ws, stocks_next, stocks_next - 1, 6)
-        copy_format_and_formulas(sh, loans_ws, loans_next, loans_next - 1, 5)
+        copy_format_and_formulas(sh, stocks_ws, stocks_next, stocks_next - 1, len(stocks_accounts) + 2)
+        copy_format_and_formulas(sh, loans_ws, loans_next, loans_next - 1, len(loans_accounts) + 2)
 
         # finally update manual values
         master_ws.update(f'A{master_next}', [[current_date]], value_input_option='USER_ENTERED')
         master_ws.update(f'D{master_next}', [[body["crypto"]]], value_input_option='USER_ENTERED')
         master_ws.update(f'F{master_next}', [[body["cash"]]], value_input_option='USER_ENTERED')
-        stocks_ws.update(f'B{stocks_next}:E{stocks_next}', [[body["revolut"], body["trading212"], body["xtb"], body["robinhood"]]], value_input_option='USER_ENTERED')
-        loans_ws.update(f'B{loans_next}:D{loans_next}', [[body["personal"], body["twino"], body["peerberry"]]], value_input_option='USER_ENTERED')
+
+        stocks_values = body.get("stocks", {})
+        if stocks_accounts:
+            row_values = [stocks_values.get(acc, 0) for acc in stocks_accounts]
+            stocks_ws.update(account_range(stocks_next, len(stocks_accounts)), [row_values], value_input_option='USER_ENTERED')
+
+        loans_values = body.get("loans", {})
+        if loans_accounts:
+            row_values = [loans_values.get(acc, 0) for acc in loans_accounts]
+            loans_ws.update(account_range(loans_next, len(loans_accounts)), [row_values], value_input_option='USER_ENTERED')
 
         note = body.get("note", "").strip()
         if note:

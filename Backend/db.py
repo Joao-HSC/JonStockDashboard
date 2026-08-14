@@ -8,11 +8,15 @@ with open('./credentials/sheet.json') as f:
 def get_spreadsheet():
     return gc.open_by_key(sheet_config["spreadsheet_id"])
 
+def get_worksheet(key):
+    name = sheet_config["worksheets"][key]
+    return get_spreadsheet().worksheet(name)
+
 def get_sheet_data():
-    return get_spreadsheet().sheet1.get_all_records()
+    return get_worksheet("master").get_all_records()
 
 def get_master_history():
-    ws = get_spreadsheet().sheet1
+    ws = get_worksheet("master")
     values = ws.get_values(
         value_render_option='UNFORMATTED_VALUE',
         date_time_render_option='FORMATTED_STRING',

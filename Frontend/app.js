@@ -40,16 +40,61 @@ function setMessage(text, kind) {
   if (kind) el.classList.add(kind);
 }
 
+function buildAccountFields(containerId, accounts, group) {
+  const container = document.getElementById(containerId);
+  container.replaceChildren();
+
+  if (!accounts.length) {
+    const note = document.createElement('p');
+    note.className = 'field-empty-note';
+    note.textContent = 'No accounts found in this section of your sheet.';
+    container.appendChild(note);
+    return;
+  }
+
+  accounts.forEach((name) => {
+    const label = document.createElement('label');
+    label.appendChild(document.createTextNode(name + ' '));
+
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.step = '0.01';
+    input.required = true;
+    input.dataset.group = group;
+    input.dataset.account = name;
+
+    label.appendChild(input);
+    container.appendChild(label);
+  });
+}
+
+async function loadAccounts() {
+  try {
+    const res = await fetch(`${API_BASE}/portfolio/accounts`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to load accounts');
+
+    buildAccountFields('stocks-fields', data.stocks_accounts, 'stocks');
+    buildAccountFields('loans-fields', data.loans_accounts, 'loans');
+  } catch (err) {
+    console.error('Could not load account list:', err);
+    document.getElementById('stocks-fields').textContent = 'Could not load accounts.';
+    document.getElementById('loans-fields').textContent = 'Could not load accounts.';
+  }
+}
+
 async function handleSubmit(event) {
   event.preventDefault();
   const form = event.target;
   const submitBtn = document.getElementById('submit-btn');
-  const formData = new FormData(form);
 
-  const body = {};
-  for (const [key, value] of formData.entries()) {
-    body[key] = key === 'note' ? value : parseFloat(value);
-  }
+  const body = { stocks: {}, loans: {} };
+  form.querySelectorAll('input[data-group]').forEach((input) => {
+    body[input.dataset.group][input.dataset.account] = parseFloat(input.value);
+  });
+  body.crypto = parseFloat(form.querySelector('[name="crypto"]').value);
+  body.cash = parseFloat(form.querySelector('[name="cash"]').value);
+  body.note = form.querySelector('[name="note"]').value;
 
   submitBtn.disabled = true;
   setMessage('Saving…', null);
@@ -182,3 +227,4 @@ document.getElementById('tab-btn-add').addEventListener('click', () => setActive
 document.getElementById('tab-btn-charts').addEventListener('click', () => setActiveTab('charts'));
 document.getElementById('tab-btn-performance').addEventListener('click', () => setActiveTab('performance'));
 loadLatest();
+loadAccounts();
