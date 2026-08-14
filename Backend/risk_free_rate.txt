@@ -1,0 +1,4 @@
+# Annual risk-free rate assumption, as a percentage.
+# Used to compute the Sharpe Ratio on the Performance Metrics tab.
+# Edit the number below and reload the page to apply it.
+2.25

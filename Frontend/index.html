@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio Dashboard</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="page">
+
+  <header class="page-header">
+    <h1>Portfolio Dashboard</h1>
+    <p class="subtitle">Track and grow your net worth</p>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab-btn active" id="tab-btn-add" role="tab" aria-selected="true" aria-controls="tab-add">Add Snapshot</button>
+    <button class="tab-btn" id="tab-btn-charts" role="tab" aria-selected="false" aria-controls="tab-charts">Charts</button>
+    <button class="tab-btn" id="tab-btn-performance" role="tab" aria-selected="false" aria-controls="tab-performance">Performance Metrics</button>
+  </nav>
+
+  <section id="tab-add" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-add">
+
+    <section id="summary" class="summary">
+      <div class="summary-card" data-field="date">
+        <span class="summary-label">Latest snapshot</span>
+        <span class="summary-value">—</span>
+      </div>
+      <div class="summary-card" data-field="total">
+        <span class="summary-label">Total</span>
+        <span class="summary-value">—</span>
+      </div>
+      <div class="summary-card" data-field="stocks">
+        <span class="summary-label">Stocks/ETFs</span>
+        <span class="summary-value">—</span>
+      </div>
+      <div class="summary-card" data-field="cash">
+        <span class="summary-label">Cash</span>
+        <span class="summary-value">—</span>
+      </div>
+      <div class="summary-card" data-field="crypto">
+        <span class="summary-label">Crypto</span>
+        <span class="summary-value">—</span>
+      </div>
+      <div class="summary-card" data-field="change">
+        <span class="summary-label">Change</span>
+        <span class="summary-value">—</span>
+      </div>
+    </section>
+
+    <form id="snapshot-form" class="card">
+      <h2>New Snapshot</h2>
+
+      <fieldset>
+        <legend>Stocks / ETFs (€)</legend>
+        <div class="field-grid">
+          <label>Revolut <input type="number" step="0.01" name="revolut" required></label>
+          <label>Trading212 <input type="number" step="0.01" name="trading212" required></label>
+          <label>XTB <input type="number" step="0.01" name="xtb" required></label>
+          <label>Robinhood <input type="number" step="0.01" name="robinhood" required></label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Loans (€)</legend>
+        <div class="field-grid">
+          <label>Personal <input type="number" step="0.01" name="personal" required></label>
+          <label>Twino <input type="number" step="0.01" name="twino" required></label>
+          <label>Peerberry <input type="number" step="0.01" name="peerberry" required></label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Other (€)</legend>
+        <div class="field-grid">
+          <label>Crypto <input type="number" step="0.01" name="crypto" required></label>
+          <label>Cash <input type="number" step="0.01" name="cash" required></label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Notes</legend>
+        <label class="notes-label">
+          <textarea name="note" rows="2" placeholder="Anything worth remembering about today's snapshot…"></textarea>
+        </label>
+      </fieldset>
+
+      <button type="submit" id="submit-btn">Save Snapshot</button>
+      <p id="form-message" class="form-message" role="status"></p>
+    </form>
+
+  </section>
+
+  <section id="tab-charts" class="tab-panel" hidden role="tabpanel" aria-labelledby="tab-btn-charts">
+    <div id="charts-status" class="charts-status">Loading history…</div>
+    <div id="chart-total-container" class="chart-card" hidden></div>
+    <div id="chart-assets-container" class="chart-card" hidden></div>
+  </section>
+
+  <section id="tab-performance" class="tab-panel" hidden role="tabpanel" aria-labelledby="tab-btn-performance">
+    <div id="performance-status" class="charts-status">Loading performance…</div>
+    <div id="performance-tiles" class="perf-tiles" style="display:none">
+      <div class="perf-tile" data-field="cagr">
+        <span class="summary-label">CAGR</span>
+        <span class="perf-value">—</span>
+        <span class="perf-description">Annualized growth rate since your first snapshot</span>
+      </div>
+      <div class="perf-tile" data-field="max_drawdown">
+        <span class="summary-label">Max Drawdown</span>
+        <span class="perf-value">—</span>
+        <span class="perf-description">Largest peak-to-trough decline</span>
+      </div>
+      <div class="perf-tile" data-field="sharpe_ratio">
+        <span class="summary-label">Sharpe Ratio</span>
+        <span class="perf-value">—</span>
+        <span class="perf-description">Monthly returns, annualized, 0% risk-free rate assumed</span>
+      </div>
+    </div>
+    <p id="performance-period" class="perf-period" hidden></p>
+  </section>
+
+</div>
+<script src="charts.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

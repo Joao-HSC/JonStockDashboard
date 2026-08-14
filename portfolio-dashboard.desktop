@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Portfolio Dashboard
+Comment=Track and grow your net worth
+Exec=/home/jon/Projects/JonStockDashboard/launch.sh
+Icon=x-office-spreadsheet
+Terminal=false
+Categories=Office;Finance;
